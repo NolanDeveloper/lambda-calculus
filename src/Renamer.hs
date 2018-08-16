@@ -55,15 +55,14 @@ nextUnique = do
 makeVariable :: Text -> Renamer Variable
 makeVariable name = Variable <$> nextUnique <*> pure name
 
+modifyScope :: (Map Text Variable -> Map Text Variable) -> Renamer ()
+modifyScope f = modify (\state -> state { scope = f (scope state) })
+
 bringToScope :: Variable -> Renamer ()
-bringToScope variable@(Variable _ name) = do
-    state@RenamerState { scope = scope } <- get
-    put $ state { scope = insert name variable scope }
+bringToScope variable@(Variable _ name) = modifyScope (insert name variable)
 
 deleteFromScope :: Variable -> Renamer ()
-deleteFromScope variable@(Variable _ name) = do
-    state@RenamerState { scope = scope } <- get
-    put $ state { scope = delete name scope }
+deleteFromScope (Variable _ name) = modifyScope (delete name)
 
 renameLeftSide 
     :: Map Text (Expression Text) 
