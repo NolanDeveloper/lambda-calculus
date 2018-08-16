@@ -1,19 +1,23 @@
-module Language(Expression(..), Literal(..)) where
+module Language where
 
 import Data.Text
+import Data.Map
 
-data Expression
-    = Identifier Text
-    | Literal Literal
+data Module id
+    = Module {
+        moduleBindings :: Map id (Expression id)
+    }
 
-data Literal
-    = LText Text
-    | LInteger Int
+data Expression id
+    = Identifier id
+    | Literal (Either Text Int)
+    | Application (Expression id) (Expression id)
+    | Lambda id (Expression id)
 
-instance Show Expression where
-    show (Identifier name) = unpack name
-    show (Literal literal) = show literal
-    
-instance Show Literal where
-    show (LText value) = "\"" ++ unpack value ++ "\""
-    show (LInteger value) = show value
+instance Show id => Show (Expression id) where
+    show (Identifier name) = show name
+    show (Literal (Left value)) = "\"" ++ unpack value ++ "\""
+    show (Literal (Right value)) = show value
+    show (Application f x) = "(" ++ show f ++ " " ++ show x ++ ")"
+    show (Lambda x e) 
+        = "(\\" ++ show x ++ " -> " ++ show e ++ ")"

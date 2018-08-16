@@ -1,13 +1,16 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Main where
 
-import Language
-
-import Paths_lambda_calculus
 import Data.Text as T
 import qualified Data.Text.IO as T
-import Parser
 import Control.Monad
+import Data.Map
+
+import Paths_lambda_calculus
+
+import Language
+import Parser
+import Renamer
 
 readDataFile :: String -> IO Text
 readDataFile fileName = getDataFileName fileName >>= T.readFile 
@@ -15,13 +18,19 @@ readDataFile fileName = getDataFileName fileName >>= T.readFile
 main :: IO ()
 main = do
     content <- readDataFile "data/source.txt"
-    case parse content of
-        Left error -> do
+    let onError error = do
             putStr "Error: " 
             putStrLn error
-        Right definitions ->
-            forM_ definitions $ \(name, value) -> do
-                T.putStr name
-                T.putStr " = "
+    either onError id $ do
+        sourceModule@(Module bindings) <- parse content
+        let renamedModule@(Module bindings') = rename sourceModule
+        let display name value = do
+                putStr $ show name
+                putStr " = "
                 putStrLn $ show value
-    print content
+        pure $ do
+            putStrLn "===================================="
+            traverseWithKey display bindings
+            putStrLn "===================================="
+            traverseWithKey display bindings'
+            putStrLn "===================================="
