@@ -4,21 +4,21 @@ module Parser where
 import Language
 import Data.Text
 import Data.Char
-import Data.Map as M
 import Data.Attoparsec.Text as Atto
 import Control.Monad
+import qualified Data.Map as Map
 
-parse :: Text -> Either String (Module Text)
+parse :: Text -> Either String (Map.Map Text (Expression Text))
 parse text = do
     bindings <- parseOnly (many' binding) text
     bindings' <- 
         let f m (name, value) = do
-                when (member name m)
+                when (Map.member name m)
                     (error $ "Second definition of symbol \"" 
                         ++ unpack name ++ "\"")
-                pure $ insert name value m
-        in foldM f M.empty bindings
-    pure $ Module $ fromList bindings
+                pure $ Map.insert name value m
+        in foldM f Map.empty bindings
+    pure $ Map.fromList bindings
 
 binding :: Parser (Text, Expression Text)
 binding = do
@@ -32,8 +32,7 @@ binding = do
 
 expression :: Parser (Expression Text)
 expression = choice 
-    [ Literal <$> literal
-    , Identifier <$> identifier 
+    [ Identifier <$> identifier
     , do
         string "(\\"
         skipSpaces
@@ -53,14 +52,6 @@ expression = choice
         pure $ Application left right
     ] 
 
-literal :: Parser (Either Text Int)
-literal = eitherP text integer
-  where
-    text = pack <$> wrapped quotes anyChar quotes
-      where 
-        quotes = string "\""
-    integer = signed decimal
-
 identifier :: Parser Text
 identifier = do
     name <- many1 letter
@@ -71,8 +62,3 @@ identifier = do
 
 skipSpaces :: Parser ()
 skipSpaces = skipWhile isSpace
-
-wrapped :: Parser a -> Parser b -> Parser c -> Parser [b]
-wrapped begin content end = do
-    begin
-    manyTill content end

@@ -28,4 +28,5 @@ executable lambda-calculus
                        , Language
                        , Parser
                        , Renamer
+                       , Execution
   autogen-modules:     Paths_lambda_calculus

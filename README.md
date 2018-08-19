@@ -2,21 +2,65 @@
 
 ## input
 
-    f = "a"
-    g = 42
-    id = (\x -> x)
-    j = (id g)
+    zero = (\x -> (\y -> y))
+    one = (succ zero)
+    two = (succ one)
+    three = (succ two)
+    four = (succ three)
+    five = (succ four) 
+    six = (succ five)
+    seven = (succ six)
+    eight = (succ seven)
+    nine = (succ eight)
+    ten = (succ nine)
+    succ = (\n -> (\s -> (\z -> (s ((n s) z)))))
+    add = (\n -> (\m -> (\s -> (\z -> ((n s) ((m s) z))))))
+    mult = (\n -> (\m -> (\s -> (\z -> ((n (m s)) z)))))
+    power = (\n -> (\m -> (\s -> (\z -> (((m n) s) z)))))
+    main = ((power three) two)
 
 ## output
 
-    ====================================
-    "f" = "a"
-    "g" = 42
-    "id" = (\"x" -> "x")
-    "j" = ("id" "g")
-    ====================================
-    f0 = "a"
-    g1 = 42
-    id2 = (\x4 -> x4)
-    j3 = (id2 g1)
-    ====================================
+    0) main
+    1) ((power three) two)
+    2) ((power three) (succ one))
+    3) ((power three) ((\n -> (\s -> (\z -> (s ((n s) z))))) one))
+    4) ((power three) (\s -> (\z -> (s ((one s) z)))))
+    5) ((power three) (\s -> (\z -> (s (((succ zero) s) z)))))
+    6) ((power three) (\s -> (\z -> (s ((((\n -> (\s -> (\z -> (s ((n s) z))))) zero) s) z)))))
+    7) ((power three) (\s -> (\z -> (s (((\s -> (\z -> (s ((zero s) z)))) s) z)))))
+    8) ((power three) (\s -> (\z -> (s ((\z -> (s ((zero s) z))) z)))))
+    9) ((power three) (\s -> (\z -> (s (s ((zero s) z))))))
+    10) ((power three) (\s -> (\z -> (s (s (((\x -> (\y -> y)) s) z))))))
+    11) ((power three) (\s -> (\z -> (s (s ((\y -> y) z))))))
+    12) ((power three) (\s -> (\z -> (s (s z)))))
+    13) (((\n -> (\m -> (\s -> (\z -> (((m n) s) z))))) three) (\s -> (\z -> (s (s z)))))
+    14) ((\m -> (\s -> (\z -> (((m three) s) z)))) (\s -> (\z -> (s (s z)))))
+    15) ((\m -> (\s -> (\z -> (((m (succ two)) s) z)))) (\s -> (\z -> (s (s z)))))
+    16) ((\m -> (\s -> (\z -> (((m ((\n -> (\s -> (\z -> (s ((n s) z))))) two)) s) z)))) (\s -> (\z -> (s (s z)))))
+    17) ((\m -> (\s -> (\z -> (((m (\s -> (\z -> (s ((two s) z))))) s) z)))) (\s -> (\z -> (s (s z)))))
+    18) ((\m -> (\s -> (\z -> (((m (\s -> (\z -> (s (((succ one) s) z))))) s) z)))) (\s -> (\z -> (s (s z)))))
+    19) ((\m -> (\s -> (\z -> (((m (\s -> (\z -> (s ((((\n -> (\s -> (\z -> (s ((n s) z))))) one) s) z))))) s) z)))) (\s -> (\z -> (s (s z)))))
+    20) ((\m -> (\s -> (\z -> (((m (\s -> (\z -> (s (((\s -> (\z -> (s ((one s) z)))) s) z))))) s) z)))) (\s -> (\z -> (s (s z)))))
+    21) ((\m -> (\s -> (\z -> (((m (\s -> (\z -> (s ((\z -> (s ((one s) z))) z))))) s) z)))) (\s -> (\z -> (s (s z)))))
+    22) ((\m -> (\s -> (\z -> (((m (\s -> (\z -> (s (s ((one s) z)))))) s) z)))) (\s -> (\z -> (s (s z)))))
+    23) ((\m -> (\s -> (\z -> (((m (\s -> (\z -> (s (s (((succ zero) s) z)))))) s) z)))) (\s -> (\z -> (s (s z)))))
+    24) ((\m -> (\s -> (\z -> (((m (\s -> (\z -> (s (s ((((\n -> (\s -> (\z -> (s ((n s) z))))) zero) s) z)))))) s) z)))) (\s -> (\z -> (s (s z)))))
+    25) ((\m -> (\s -> (\z -> (((m (\s -> (\z -> (s (s (((\s -> (\z -> (s ((zero s) z)))) s) z)))))) s) z)))) (\s -> (\z -> (s (s z)))))
+    26) ((\m -> (\s -> (\z -> (((m (\s -> (\z -> (s (s ((\z -> (s ((zero s) z))) z)))))) s) z)))) (\s -> (\z -> (s (s z)))))
+    27) ((\m -> (\s -> (\z -> (((m (\s -> (\z -> (s (s (s ((zero s) z))))))) s) z)))) (\s -> (\z -> (s (s z)))))
+    28) ((\m -> (\s -> (\z -> (((m (\s -> (\z -> (s (s (s (((\x -> (\y -> y)) s) z))))))) s) z)))) (\s -> (\z -> (s (s z)))))
+    29) ((\m -> (\s -> (\z -> (((m (\s -> (\z -> (s (s (s ((\y -> y) z))))))) s) z)))) (\s -> (\z -> (s (s z)))))
+    30) ((\m -> (\s -> (\z -> (((m (\s -> (\z -> (s (s (s z)))))) s) z)))) (\s -> (\z -> (s (s z)))))
+    31) (\s -> (\z -> ((((\s -> (\z -> (s (s z)))) (\s -> (\z -> (s (s (s z)))))) s) z)))
+    32) (\s -> (\z -> (((\z -> ((\s -> (\z -> (s (s (s z))))) ((\s -> (\z -> (s (s (s z))))) z))) s) z)))
+    33) (\s -> (\z -> (((\s -> (\z -> (s (s (s z))))) ((\s -> (\z -> (s (s (s z))))) s)) z)))
+    34) (\s -> (\z -> ((\z -> (((\s -> (\z -> (s (s (s z))))) s) (((\s -> (\z -> (s (s (s z))))) s) (((\s -> (\z -> (s (s (s z))))) s) z)))) z)))
+    35) (\s -> (\z -> (((\s -> (\z -> (s (s (s z))))) s) (((\s -> (\z -> (s (s (s z))))) s) (((\s -> (\z -> (s (s (s z))))) s) z)))))
+    36) (\s -> (\z -> ((\z -> (s (s (s z)))) (((\s -> (\z -> (s (s (s z))))) s) (((\s -> (\z -> (s (s (s z))))) s) z)))))
+    37) (\s -> (\z -> (s (s (s (((\s -> (\z -> (s (s (s z))))) s) (((\s -> (\z -> (s (s (s z))))) s) z)))))))
+    38) (\s -> (\z -> (s (s (s ((\z -> (s (s (s z)))) (((\s -> (\z -> (s (s (s z))))) s) z)))))))
+    39) (\s -> (\z -> (s (s (s (s (s (s (((\s -> (\z -> (s (s (s z))))) s) z)))))))))
+    40) (\s -> (\z -> (s (s (s (s (s (s ((\z -> (s (s (s z)))) z)))))))))
+    41) (\s -> (\z -> (s (s (s (s (s (s (s (s (s z)))))))))))
+

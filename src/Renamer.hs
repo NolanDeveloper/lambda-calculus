@@ -4,16 +4,16 @@ import Language
 import Data.Text
 import Control.Monad
 import Control.Monad.State
-import Data.Map as M
 import Data.Function
 import Data.Maybe
+import qualified Data.Map as Map
 
 import Debug.Trace
 
 data Variable = Variable Int Text
 
 instance Show Variable where
-    show (Variable unique name) = unpack name ++ show unique
+    show (Variable unique name) = unpack name 
 
 instance Eq Variable where
     (Variable left _) == (Variable right _) = left == right
@@ -24,24 +24,24 @@ instance Ord Variable where
 data RenamerState
     = RenamerState {
         unique :: Int,
-        scope :: Map Text Variable
+        scope :: Map.Map Text Variable
     }
 
 type Renamer a = State RenamerState a
 
-rename :: Module Text -> Module Variable
-rename module_ = evalState action initialState
+rename :: Map.Map Text (Expression Text) -> Map.Map Variable (Expression Variable)
+rename bindings = evalState action initialState
   where
-    action = Module <$> renamer (moduleBindings module_)
+    action = renamer bindings
     initialState 
         = RenamerState {
             unique = 0,
-            scope = M.empty
+            scope = Map.empty
         }
 
 renamer
-    :: Map Text (Expression Text) 
-    -> Renamer (Map Variable (Expression Variable))
+    :: Map.Map Text (Expression Text) 
+    -> Renamer (Map.Map Variable (Expression Variable))
 renamer bindings = do
     bindings' <- renameLeftSide bindings 
     renameRightSide bindings'
@@ -55,33 +55,33 @@ nextUnique = do
 makeVariable :: Text -> Renamer Variable
 makeVariable name = Variable <$> nextUnique <*> pure name
 
-modifyScope :: (Map Text Variable -> Map Text Variable) -> Renamer ()
+modifyScope :: (Map.Map Text Variable -> Map.Map Text Variable) -> Renamer ()
 modifyScope f = modify (\state -> state { scope = f (scope state) })
 
 bringToScope :: Variable -> Renamer ()
-bringToScope variable@(Variable _ name) = modifyScope (insert name variable)
+bringToScope variable@(Variable _ name) = modifyScope (Map.insert name variable)
 
 deleteFromScope :: Variable -> Renamer ()
-deleteFromScope (Variable _ name) = modifyScope (delete name)
+deleteFromScope (Variable _ name) = modifyScope (Map.delete name)
 
 renameLeftSide 
-    :: Map Text (Expression Text) 
-    -> Renamer (Map Variable (Expression Text))
+    :: Map.Map Text (Expression Text) 
+    -> Renamer (Map.Map Variable (Expression Text))
 renameLeftSide bindings = do
     bindings' <- 
-        forM (toList bindings) $ \(name, value) -> do
+        forM (Map.toList bindings) $ \(name, value) -> do
             variable <- makeVariable name
             bringToScope variable
             pure (variable, value)
-    pure $ fromAscList bindings'
+    pure $ Map.fromAscList bindings'
 
 renameRightSide     
-    :: Map Variable (Expression Text) 
-    -> Renamer (Map Variable (Expression Variable))
+    :: Map.Map Variable (Expression Text) 
+    -> Renamer (Map.Map Variable (Expression Variable))
 renameRightSide bindings = traverse renameExpression bindings
 
 lookup :: Text -> Renamer (Maybe Variable)
-lookup name = (!? name) . scope <$> get
+lookup name = (Map.!? name) . scope <$> get
 
 renameExpression 
     :: Expression Text
@@ -92,8 +92,6 @@ renameExpression (Identifier name) = do
     case Identifier <$> maybeVariable of
         Nothing -> error $ "No such name: \"" ++ unpack name ++ "\""
         Just p -> pure p
-
-renameExpression (Literal value) = pure $ Literal value
 
 renameExpression (Application function argument) = 
     let function' = renameExpression function
