@@ -23,10 +23,12 @@ executable lambda-calculus
                        , text >= 1.2 && < 2
                        , attoparsec >= 0.13 && < 1
                        , containers >= 0.5 && < 0.6
-                       , monads-tf >= 0.1 && < 0.2
+                       , transformers >= 0.5.5 && < 0.5.6
   other-modules:       Paths_lambda_calculus
                        , Language
                        , Parser
-                       , Renamer
-                       , Execution
   autogen-modules:     Paths_lambda_calculus
+  ghc-options:         -Wall
+                       -Wno-name-shadowing
+                       -Wno-unused-do-bind
+                       -Werror

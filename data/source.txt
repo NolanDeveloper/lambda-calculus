@@ -9,11 +9,8 @@ seven = (succ six)
 eight = (succ seven)
 nine = (succ eight)
 ten = (succ nine)
-
 succ = (\n -> (\s -> (\z -> (s ((n s) z)))))
-
 add = (\n -> (\m -> (\s -> (\z -> ((n s) ((m s) z))))))
 mult = (\n -> (\m -> (\s -> (\z -> ((n (m s)) z)))))
 power = (\n -> (\m -> (\s -> (\z -> (((m n) s) z)))))
-
-main = ((power three) two)
+main = ((mult two) seven)
